@@ -13,24 +13,28 @@ public class SpawnManager : MonoBehaviour
     void Start()
     {
         player = FindObjectOfType<PlayerController>();
-        SpawnBall(0);
-        SpawnBall(1);
-        SpawnBall(2);
+        Instantiate(ballPrefab[0], GenerateSpawnPosition(), ballPrefab[0].transform.rotation);
+        Instantiate(ballPrefab[1], GenerateSpawnPosition(), ballPrefab[1].transform.rotation);
+        Instantiate(ballPrefab[2], GenerateSpawnPosition(), ballPrefab[2].transform.rotation);
+        ballCount = GameObject.FindGameObjectsWithTag("Ball").Length;
     }
 
     // Update is called once per frame
     void Update()
     {
-        ballCount = GameObject.FindGameObjectsWithTag("Ball").Length;
         if (ballCount < 3)
         {
-            SpawnBall(player.colorIndex);
+            StartCoroutine(SpawnBall(player.colorIndex));
+            //SpawnBall(player.colorIndex);
         }
     }
 
-    void SpawnBall(int index)
-    {        
+    IEnumerator SpawnBall(int index)
+    {
+        ballCount++;
+        yield return new WaitForSeconds(1);
         Instantiate(ballPrefab[index], GenerateSpawnPosition(), ballPrefab[index].transform.rotation);
+        //ballCount = GameObject.FindGameObjectsWithTag("Ball").Length;
     }
 
     private Vector3 GenerateSpawnPosition()

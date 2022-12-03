@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour
     public Color playerColor;
 
     public GameManager gameManager;
+    public SpawnManager spawnManager;
 
     public float range = 24;
     // Start is called before the first frame update
@@ -23,15 +24,16 @@ public class PlayerController : MonoBehaviour
         playerRenderer = GetComponent<Renderer>();
         ColorPlayer();
 
-        gameManager = FindObjectOfType<GameManager>();
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        spawnManager = GameObject.Find("SpawnManager").GetComponent<SpawnManager>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        StayInMap();        
         if (!gameManager.isGameOver)
-        {
-            StayInMap();
+        {            
             //Player Controll        
             float forwardInput = Input.GetAxis("Vertical");
             playerRB.AddForce(gameObject.transform.forward * forwardInput * speed);
@@ -43,14 +45,14 @@ public class PlayerController : MonoBehaviour
     //Check is ball collided has same color
     private void OnTriggerEnter(Collider other)
     {
+        spawnManager.ballCount--;
         var ballRenderer = other.GetComponent<Renderer>();
         var ballColor = ballRenderer.material.GetColor("_Color");
 
-        
+        //if player color == ball color, score++ and get the index of ball prefab to store new ball, else, lose
         if (playerColor == ballColor)
         {
-            gameManager.score++;
-            Debug.Log(gameManager.score);
+            gameManager.UpdateScore();
             for (int i = 0; i < material.Length; i++)
             {
                 if (material[i].color == ballColor)
@@ -61,13 +63,13 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            Debug.Log("Game Over");
-            gameManager.isGameOver = true;
+            gameManager.GameOver();
         }   
         Destroy(other.gameObject);
         ColorPlayer();
     }
 
+    //set player new color and get that color
     void ColorPlayer()
     {
         playerRenderer.material.SetColor("_Color", material[Random.Range(0, material.Length)].color);
